@@ -36,7 +36,7 @@ const Map = () => {
 
   const getUserData = useCallback(async () => {
     const responseData = await fetch(
-      `/api/connectDB?walletAddress=${session?.user?.address}`,
+      `/api/connectDB?walletAddress=${session?.user?.address || ""}`,
       {
         method: "GET",
         headers: {
@@ -54,17 +54,14 @@ const Map = () => {
   }, [session?.user?.address]);
 
   useEffect(() => {
-    if (initGetUserData || !session?.user?.address) return;
+    if (initGetUserData) return;
 
     getUserData();
   }, [getUserData, initGetUserData, session]);
 
   useEffect(() => {
-    console.log("hasAccessToLocation", hasAccessToLocation);
     console.log("chosenSquares", chosenSquares);
     if (hasAccessToLocation || chosenSquares === null) return;
-
-    console.log("1");
 
     const id = navigator.geolocation.watchPosition(
       (position) => {
@@ -89,7 +86,6 @@ const Map = () => {
 
               if (!chosenSquares.includes(res.words)) {
                 setWords(res.words);
-                console.log("setChosenSquares");
                 setChosenSquares([...chosenSquares, res.words]);
               }
             })
