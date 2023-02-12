@@ -91,7 +91,7 @@ function CameraPopup({ setIsOpened, chosenSquares, setHasAccessToLocation }) {
     const session = await getSession();
 
     const data = {
-      walletAddress: session.user.address,
+      walletAddress: session?.user?.address,
       chosenSquares,
       ipfs3RandomWordsLink,
       imageURL,

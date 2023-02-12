@@ -36,7 +36,7 @@ const Map = () => {
 
   const getUserData = useCallback(async () => {
     const responseData = await fetch(
-      `/api/connectDB?walletAddress=${session.user.address}`,
+      `/api/connectDB?walletAddress=${session?.user?.address}`,
       {
         method: "GET",
         headers: {
@@ -51,13 +51,13 @@ const Map = () => {
 
     setInitGetUserData(true);
     setChosenSquares(response.data[response.data.length - 1]?.words || []);
-  }, [session.user.address]);
+  }, [session?.user?.address]);
 
   useEffect(() => {
-    if (initGetUserData || !session.user.address) return;
+    if (initGetUserData || !session?.user?.address) return;
 
     getUserData();
-  }, [getUserData, initGetUserData, session.user.address]);
+  }, [getUserData, initGetUserData, session]);
 
   useEffect(() => {
     if (hasAccessToLocation || chosenSquares === null) return;
