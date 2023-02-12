@@ -1,0 +1,17 @@
+{
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "../NFTD-stablecoin"
+    },
+    {
+      "path": "../NFTD-EARTHVERSE/NFTD-stablecoin-app/hashing"
+    }
+  ],
+  "settings": {
+    "slither.solcPath": "",
+    "slither.hiddenDetectors": []
+  }
+}

@@ -1,13 +1,16 @@
 import React, { useRef, useState } from "react";
+import { useAccount, useContractWrite, useWaitForTransaction } from "wagmi";
 
 import BlackCameraIcon from "../svg/components/BlackCameraIcon";
 import { Camera } from "react-camera-pro";
-import CameraIcon from "../svg/components/CameraIcon";
 import Image from "next/image";
+import { NFTStorage } from "nft.storage";
+import ReactLoading from "react-loading";
 import UploadIcon from "@mui/icons-material/Upload";
 import { fromString } from "uint8arrays/from-string";
 import { getSession } from "next-auth/react";
 import storeFileToIPFS from "../helpers/storeFileToIPFS";
+import { useEffect } from "react";
 
 const errorMessages = {
   noCameraAccessible:
@@ -19,13 +22,50 @@ const errorMessages = {
   canvas: "Canvas is not supported.",
 };
 
-function CameraPopup({ setIsOpened, chosenSquares }) {
+function CameraPopup({ setIsOpened, chosenSquares, setHasAccessToLocation }) {
   const camera = useRef(null);
-  const [price, setPrice] = useState(0);
+  // const [price, setPrice] = useState(0);
+  const { address } = useAccount();
   const [imageURL, setImageURL] = useState(null);
   const [imageAvatarURL, setImageAvatarURL] = useState(null);
   const [isTakingCameraImg, setIsTakingCameraImg] = useState(false);
   const [isSendingData, setIsSendingData] = useState(false);
+  const [isLoadingPopup, setIsLoadingPopup] = useState(false);
+
+  const contractConfig = {
+    address: "0x871a3a051b71F6f8C3F1247d5048906CF62046df",
+    abi: [
+      {
+        inputs: [
+          { internalType: "address", name: "to", type: "address" },
+          { internalType: "string", name: "ipfsURI", type: "string" },
+        ],
+        name: "safeMintNFT",
+        outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+        stateMutability: "nonpayable",
+        type: "function",
+      },
+    ],
+  };
+
+  const { data, writeAsync: safeMintNFTLand } = useContractWrite({
+    ...contractConfig,
+    functionName: "safeMintNFT",
+  });
+  const { isLoading, isSuccess } = useWaitForTransaction({
+    hash: data?.hash,
+  });
+
+  useEffect(() => {
+    if (!isSuccess || isLoading) return;
+
+    setIsSendingData(false);
+    setImageURL(null);
+    setImageAvatarURL(null);
+    setHasAccessToLocation(false);
+    setIsOpened(false);
+    //setIsOpened(false);
+  }, [isLoading, isSuccess, setHasAccessToLocation, setIsOpened]);
 
   const capture = () => {
     if (!camera.current) return;
@@ -35,6 +75,11 @@ function CameraPopup({ setIsOpened, chosenSquares }) {
 
   const handlePopupCloseClick = () => {
     setIsOpened(false);
+  };
+
+  const handleTakePhotoClick = () => {
+    capture();
+    setIsTakingCameraImg(false);
   };
 
   const storeDataToMongoDb = async (
@@ -53,7 +98,7 @@ function CameraPopup({ setIsOpened, chosenSquares }) {
       ipfsCameraLink,
       imageAvatarURL: imageAvatarURL.name,
       ipfsAvatarLink,
-      price,
+      // price,
     };
 
     await fetch("/api/postData", {
@@ -65,13 +110,38 @@ function CameraPopup({ setIsOpened, chosenSquares }) {
     });
   };
 
+  const storeNFTMetaDataToIPFS = async (file) => {
+    const nft = {
+      image: new File([file], file.name, { type: file.type }),
+      name: `NFT Land - ${chosenSquares[chosenSquares.length - 1]}`,
+      description: "Piece of land from the earthverse",
+      // attributes: [
+      //   {
+      //     trait_type: "Validness",
+      //     value: "Valid",
+      //   },
+      // ],
+    };
+
+    const client = new NFTStorage({
+      token: process.env.NEXT_PUBLIC_NFT_STORAGE_API_KEY,
+    });
+    const metadata = await client.store(nft);
+    return metadata.url;
+  };
+
   const handleSubmitDialogClick = async () => {
+    setIsLoadingPopup(true);
+    const data = fromString(imageURL.slice(23), "base64");
+    const metadataURL = await storeNFTMetaDataToIPFS(data);
+    //MINT NFT LAND
+    await safeMintNFTLand?.({
+      recklesslySetUnpreparedArgs: [address, metadataURL],
+    });
+
     //STORE TO IPFS
     const ipfs3RandomWordsLink = await storeFileToIPFS(chosenSquares.join(" "));
-
-    const data = fromString(imageURL.slice(23), "base64");
     const ipfsCameraLink = await storeFileToIPFS(data);
-
     const ipfsAvatarLink = await storeFileToIPFS(imageAvatarURL);
 
     //STORE TO MONGODB
@@ -80,16 +150,22 @@ function CameraPopup({ setIsOpened, chosenSquares }) {
       ipfsAvatarLink,
       ipfs3RandomWordsLink
     );
-
-    setIsSendingData(false);
-    setImageURL(null);
-    setImageAvatarURL(null);
-    setPrice(0);
-    handlePopupCloseClick();
   };
 
   const handleUploadAvatar = (e) => {
     setImageAvatarURL(e.target.files[0]);
+  };
+
+  const displayButtonText = () => {
+    let text = "Submit";
+
+    if (isLoading || isLoadingPopup) {
+      text = (
+        <ReactLoading type={"bars"} color="#eab308" className="loading " />
+      );
+    }
+
+    return text;
   };
 
   return (
@@ -125,9 +201,7 @@ function CameraPopup({ setIsOpened, chosenSquares }) {
                   <div>
                     <button
                       aria-label="take a photo"
-                      onClick={() => {
-                        capture(), setIsTakingCameraImg(false);
-                      }}
+                      onClick={handleTakePhotoClick}
                     >
                       <BlackCameraIcon />
                     </button>
@@ -135,7 +209,7 @@ function CameraPopup({ setIsOpened, chosenSquares }) {
                 </div>
               ) : (
                 <>
-                  <div className="flex py-2 px-3">
+                  {/* <div className="flex py-2 px-3">
                     <h1 className="pl-2 pr-10 py-2">Rate:</h1>
                     <label
                       htmlFor="UserEmail"
@@ -156,7 +230,7 @@ function CameraPopup({ setIsOpened, chosenSquares }) {
                         Price
                       </span>
                     </label>
-                  </div>
+                  </div> */}
                   <div className="flex py-2 px-2">
                     <h1 className="pl-2 pr-10 py-2">Photo:</h1>
                     {imageURL != null ? (
@@ -175,7 +249,25 @@ function CameraPopup({ setIsOpened, chosenSquares }) {
                         className="group relative inline-flex items-center overflow-hidden rounded bg-indigo-600 px-8 py-3 text-white focus:outline-none focus:ring active:bg-indigo-500"
                       >
                         <span className="absolute right-0 translate-x-full transition-transform group-hover:-translate-x-4">
-                          <CameraIcon />
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="w-6 h-6"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
+                            />
+                          </svg>
                         </span>
                         <span className="text-sm font-medium transition-all group-hover:mr-4">
                           Take Photo
@@ -219,18 +311,14 @@ function CameraPopup({ setIsOpened, chosenSquares }) {
                     )}
                   </div>
 
-                  <button onClick={handleSubmitDialogClick}>TEST</button>
-
                   <div className="flex py-3 px-3">
                     <button
-                      disabled={
-                        !imageURL || !price || isSendingData || !imageAvatarURL
-                      }
+                      disabled={!imageURL || isSendingData || !imageAvatarURL}
                       onClick={handleSubmitDialogClick}
                       className="inline-block rounded bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-[2px] hover:text-white focus:outline-none focus:ring active:text-opacity-75"
                     >
                       <span className="block rounded-sm bg-white px-8 py-3 text-sm font-medium hover:bg-transparent">
-                        Submit
+                        {displayButtonText()}
                       </span>
                     </button>
                   </div>

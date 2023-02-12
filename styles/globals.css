@@ -17,4 +17,11 @@
   opacity: 0;
   z-index: -1;
 }
+
+.loading {
+  display: flex;
+  align-items: center;
+  height: 20px !important;
+  width: 46.9px !important;
+}
 /* Custom Css */

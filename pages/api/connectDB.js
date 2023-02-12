@@ -13,9 +13,10 @@ export default async function handler(req, res) {
       res.json({ status: 200, data: postEarthverse });
       break;
     case "GET":
+      const { walletAddress } = req.query;
       const getEarthverse = await db
         .collection("earthverse")
-        .find({})
+        .find({ walletAddress })
         .toArray();
       res.json({ status: 200, data: getEarthverse });
       break;

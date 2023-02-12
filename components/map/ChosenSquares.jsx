@@ -1,4 +1,4 @@
-import { drawChosenSquares } from "../../helpers";
+import useChosenSquares from "../../hooks/useChosenSquares";
 import { useEffect } from "react";
 import { useMap } from "react-leaflet";
 
@@ -12,12 +12,16 @@ function ChosenSquares({
   moveEnd,
 }) {
   const map = useMap();
+  const { drawChosenSquares } = useChosenSquares();
 
   useEffect(() => {
     if (chosenSquares.length) {
-      if (!isClaiming && !claimed) {
-        drawChosenSquares(map, api, [words], isClaiming, setMoveEnd);
-      } else drawChosenSquares(map, api, chosenSquares, isClaiming, setMoveEnd);
+      //TODO Maybe Remove this, but before testing drawing square
+      // if (!isClaiming && !claimed) {
+      //   drawChosenSquares(map, api, [words], isClaiming, setMoveEnd);
+      // } else {
+      drawChosenSquares(map, api, chosenSquares, isClaiming, setMoveEnd);
+      //}
     }
   }, [
     chosenSquares,
@@ -28,6 +32,7 @@ function ChosenSquares({
     setMoveEnd,
     map,
     words,
+    drawChosenSquares,
   ]);
 
   return null;
