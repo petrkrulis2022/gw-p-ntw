@@ -60,7 +60,11 @@ const Map = () => {
   }, [getUserData, initGetUserData, session]);
 
   useEffect(() => {
+    console.log("hasAccessToLocation", hasAccessToLocation);
+    console.log("chosenSquares", chosenSquares);
     if (hasAccessToLocation || chosenSquares === null) return;
+
+    console.log("1");
 
     const id = navigator.geolocation.watchPosition(
       (position) => {
@@ -74,6 +78,8 @@ const Map = () => {
           (initialCoords[0] !== lat && initialCoords[1] !== lng)
         ) {
           setInitialCoords([lat, lng]);
+
+          console.log("2");
           api
             .convertTo3wa({
               coordinates: { lat, lng },
