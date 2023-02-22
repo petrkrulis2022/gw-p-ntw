@@ -92,7 +92,7 @@ function CameraPopup({ setIsOpened, chosenSquares, setHasAccessToLocation }) {
     const metadataURL = await storeFileToIPFS(
       ipfsCameraLink,
       true,
-      `NFT Land - ${chosenSquares[chosenSquares.length - 1]}`,
+      `NFT Land - ${chosenSquares[chosenSquares?.length - 1]}`,
       price
     );
 
@@ -131,7 +131,7 @@ function CameraPopup({ setIsOpened, chosenSquares, setHasAccessToLocation }) {
     await (
       await earthverseMarketplaceContract.listNFTLand(
         NFT_LAND_ADDRESS,
-        Number(arrOfString[arrOfString.length - 1]),
+        Number(arrOfString[arrOfString?.length - 1]),
         price
       )
     ).wait();

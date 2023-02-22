@@ -150,7 +150,7 @@ const Map = () => {
           setMoveEnd={setMoveEnd}
           setLineOpacity={setLineOpacity}
         />
-        {chosenSquares.length !== 0 && (
+        {chosenSquares?.length !== 0 && (
           <ChosenSquares
             api={api}
             chosenSquares={chosenSquares}

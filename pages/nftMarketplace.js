@@ -117,7 +117,7 @@ export default function NFTMarketplace() {
   return (
     <>
       <Header />
-      {nftLandItems.length > 0 ? (
+      {nftLandItems?.length > 0 ? (
         <div className="container-nft-land-box">
           {nftLandItems.map((item, idx) => (
             <div key={idx} className="nft-land-box">

@@ -15,7 +15,7 @@ function ChosenSquares({
   const { drawChosenSquares } = useChosenSquares();
 
   useEffect(() => {
-    if (chosenSquares.length) {
+    if (chosenSquares?.length) {
       //TODO Maybe Remove this, but before testing drawing square
       // if (!isClaiming && !claimed) {
       //   drawChosenSquares(map, api, [words], isClaiming, setMoveEnd);
