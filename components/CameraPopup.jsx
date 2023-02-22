@@ -89,52 +89,52 @@ function CameraPopup({ setIsOpened, chosenSquares, setHasAccessToLocation }) {
     const ipfsCameraLink = await storeFileToIPFS(data);
     const ipfsAvatarLink = await storeFileToIPFS(imageAvatarURL);
 
-    const metadataURL = await storeFileToIPFS(
-      ipfsCameraLink,
-      true,
-      `NFT Land - ${chosenSquares[chosenSquares?.length - 1]}`,
-      price
-    );
+    // const metadataURL = await storeFileToIPFS(
+    //   ipfsCameraLink,
+    //   true,
+    //   `NFT Land - ${chosenSquares[chosenSquares?.length - 1]}`,
+    //   price
+    // );
 
-    const earthverseMarketplaceContract = new ethers.Contract(
-      EARTHVERSE_MARKETPLACE_ADDRESS,
-      EarthverseMarketplaceJson.abi,
-      signer
-    );
+    // const earthverseMarketplaceContract = new ethers.Contract(
+    //   EARTHVERSE_MARKETPLACE_ADDRESS,
+    //   EarthverseMarketplaceJson.abi,
+    //   signer
+    // );
 
-    const nftLandContract = new ethers.Contract(
-      NFT_LAND_ADDRESS,
-      NFTLandJson.abi,
-      signer
-    );
+    // const nftLandContract = new ethers.Contract(
+    //   NFT_LAND_ADDRESS,
+    //   NFTLandJson.abi,
+    //   signer
+    // );
 
-    //Mint NFTLand
-    const tx = await nftLandContract.safeMintNFT(metadataURL);
-    const rc = await tx.wait();
-    const nftLandIdHash = rc.logs[0].topics[3];
-    const [nftLandId] = utils.defaultAbiCoder.decode(
-      ["uint256"],
-      nftLandIdHash
-    );
-    const arrOfString = ethers.utils
-      .formatEther(nftLandId)
-      .toString()
-      .split("0");
+    // //Mint NFTLand
+    // const tx = await nftLandContract.safeMintNFT(metadataURL);
+    // const rc = await tx.wait();
+    // const nftLandIdHash = rc.logs[0].topics[3];
+    // const [nftLandId] = utils.defaultAbiCoder.decode(
+    //   ["uint256"],
+    //   nftLandIdHash
+    // );
+    // const arrOfString = ethers.utils
+    //   .formatEther(nftLandId)
+    //   .toString()
+    //   .split("0");
 
-    await (
-      await nftLandContract.setApprovalForAll(
-        earthverseMarketplaceContract.address,
-        true
-      )
-    ).wait();
+    // await (
+    //   await nftLandContract.setApprovalForAll(
+    //     earthverseMarketplaceContract.address,
+    //     true
+    //   )
+    // ).wait();
 
-    await (
-      await earthverseMarketplaceContract.listNFTLand(
-        NFT_LAND_ADDRESS,
-        Number(arrOfString[arrOfString?.length - 1]),
-        price
-      )
-    ).wait();
+    // await (
+    //   await earthverseMarketplaceContract.listNFTLand(
+    //     NFT_LAND_ADDRESS,
+    //     Number(arrOfString[arrOfString?.length - 1]),
+    //     price
+    //   )
+    // ).wait();
 
     //STORE TO MONGODB
     await storeDataToMongoDb(
