@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-}
+};
 
 module.exports = {
   env: {
@@ -10,4 +10,4 @@ module.exports = {
   },
 };
 
-module.exports = nextConfig
+module.exports = nextConfig;

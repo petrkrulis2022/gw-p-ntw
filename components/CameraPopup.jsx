@@ -1,16 +1,21 @@
+import {
+  EARTHVERSE_MARKETPLACE_ADDRESS,
+  NFT_LAND_ADDRESS,
+} from "../constants/index";
 import React, { useRef, useState } from "react";
-import { useAccount, useContractWrite, useWaitForTransaction } from "wagmi";
+import { ethers, utils } from "ethers";
 
 import BlackCameraIcon from "../svg/components/BlackCameraIcon";
 import { Camera } from "react-camera-pro";
+import EarthverseMarketplaceJson from "../contractsData/EarthverseMarketplaceABI.json";
 import Image from "next/image";
-import { NFTStorage } from "nft.storage";
+import NFTLandJson from "../contractsData/NFTLandABI.json";
 import ReactLoading from "react-loading";
 import UploadIcon from "@mui/icons-material/Upload";
 import { fromString } from "uint8arrays/from-string";
 import { getSession } from "next-auth/react";
 import storeFileToIPFS from "../helpers/storeFileToIPFS";
-import { useEffect } from "react";
+import { useSigner } from "wagmi";
 
 const errorMessages = {
   noCameraAccessible:
@@ -24,48 +29,13 @@ const errorMessages = {
 
 function CameraPopup({ setIsOpened, chosenSquares, setHasAccessToLocation }) {
   const camera = useRef(null);
-  // const [price, setPrice] = useState(0);
-  const { address } = useAccount();
+  const [price, setPrice] = useState(0);
+  const { data: signer } = useSigner();
   const [imageURL, setImageURL] = useState(null);
   const [imageAvatarURL, setImageAvatarURL] = useState(null);
   const [isTakingCameraImg, setIsTakingCameraImg] = useState(false);
   const [isSendingData, setIsSendingData] = useState(false);
   const [isLoadingPopup, setIsLoadingPopup] = useState(false);
-
-  const contractConfig = {
-    address: "0x871a3a051b71F6f8C3F1247d5048906CF62046df",
-    abi: [
-      {
-        inputs: [
-          { internalType: "address", name: "to", type: "address" },
-          { internalType: "string", name: "ipfsURI", type: "string" },
-        ],
-        name: "safeMintNFT",
-        outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-    ],
-  };
-
-  const { data, writeAsync: safeMintNFTLand } = useContractWrite({
-    ...contractConfig,
-    functionName: "safeMintNFT",
-  });
-  const { isLoading, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
-  });
-
-  useEffect(() => {
-    if (!isSuccess || isLoading) return;
-
-    setIsSendingData(false);
-    setImageURL(null);
-    setImageAvatarURL(null);
-    setHasAccessToLocation(false);
-    setIsOpened(false);
-    //setIsOpened(false);
-  }, [isLoading, isSuccess, setHasAccessToLocation, setIsOpened]);
 
   const capture = () => {
     if (!camera.current) return;
@@ -98,7 +68,7 @@ function CameraPopup({ setIsOpened, chosenSquares, setHasAccessToLocation }) {
       ipfsCameraLink,
       imageAvatarURL: imageAvatarURL.name,
       ipfsAvatarLink,
-      // price,
+      price,
     };
 
     await fetch("/api/postData", {
@@ -110,39 +80,61 @@ function CameraPopup({ setIsOpened, chosenSquares, setHasAccessToLocation }) {
     });
   };
 
-  const storeNFTMetaDataToIPFS = async (file) => {
-    const nft = {
-      image: new File([file], file.name, { type: file.type }),
-      name: `NFT Land - ${chosenSquares[chosenSquares.length - 1]}`,
-      description: "Piece of land from the earthverse",
-      // attributes: [
-      //   {
-      //     trait_type: "Validness",
-      //     value: "Valid",
-      //   },
-      // ],
-    };
-
-    const client = new NFTStorage({
-      token: process.env.NEXT_PUBLIC_NFT_STORAGE_API_KEY,
-    });
-    const metadata = await client.store(nft);
-    return metadata.url;
-  };
-
   const handleSubmitDialogClick = async () => {
     setIsLoadingPopup(true);
     const data = fromString(imageURL.slice(23), "base64");
-    const metadataURL = await storeNFTMetaDataToIPFS(data);
-    //MINT NFT LAND
-    await safeMintNFTLand?.({
-      recklesslySetUnpreparedArgs: [address, metadataURL],
-    });
 
     //STORE TO IPFS
     const ipfs3RandomWordsLink = await storeFileToIPFS(chosenSquares.join(" "));
     const ipfsCameraLink = await storeFileToIPFS(data);
     const ipfsAvatarLink = await storeFileToIPFS(imageAvatarURL);
+
+    const metadataURL = await storeFileToIPFS(
+      ipfsCameraLink,
+      true,
+      `NFT Land - ${chosenSquares[chosenSquares.length - 1]}`,
+      price
+    );
+
+    const earthverseMarketplaceContract = new ethers.Contract(
+      EARTHVERSE_MARKETPLACE_ADDRESS,
+      EarthverseMarketplaceJson.abi,
+      signer
+    );
+
+    const nftLandContract = new ethers.Contract(
+      NFT_LAND_ADDRESS,
+      NFTLandJson.abi,
+      signer
+    );
+
+    //Mint NFTLand
+    const tx = await nftLandContract.safeMintNFT(metadataURL);
+    const rc = await tx.wait();
+    const nftLandIdHash = rc.logs[0].topics[3];
+    const [nftLandId] = utils.defaultAbiCoder.decode(
+      ["uint256"],
+      nftLandIdHash
+    );
+    const arrOfString = ethers.utils
+      .formatEther(nftLandId)
+      .toString()
+      .split("0");
+
+    await (
+      await nftLandContract.setApprovalForAll(
+        earthverseMarketplaceContract.address,
+        true
+      )
+    ).wait();
+
+    await (
+      await earthverseMarketplaceContract.listNFTLand(
+        NFT_LAND_ADDRESS,
+        Number(arrOfString[arrOfString.length - 1]),
+        price
+      )
+    ).wait();
 
     //STORE TO MONGODB
     await storeDataToMongoDb(
@@ -150,6 +142,12 @@ function CameraPopup({ setIsOpened, chosenSquares, setHasAccessToLocation }) {
       ipfsAvatarLink,
       ipfs3RandomWordsLink
     );
+
+    setIsSendingData(false);
+    setImageURL(null);
+    setImageAvatarURL(null);
+    setHasAccessToLocation(false);
+    setIsOpened(false);
   };
 
   const handleUploadAvatar = (e) => {
@@ -159,7 +157,7 @@ function CameraPopup({ setIsOpened, chosenSquares, setHasAccessToLocation }) {
   const displayButtonText = () => {
     let text = "Submit";
 
-    if (isLoading || isLoadingPopup) {
+    if (isLoadingPopup) {
       text = (
         <ReactLoading type={"bars"} color="#eab308" className="loading " />
       );
@@ -209,7 +207,7 @@ function CameraPopup({ setIsOpened, chosenSquares, setHasAccessToLocation }) {
                 </div>
               ) : (
                 <>
-                  {/* <div className="flex py-2 px-3">
+                  <div className="flex py-2 px-3">
                     <h1 className="pl-2 pr-10 py-2">Rate:</h1>
                     <label
                       htmlFor="UserEmail"
@@ -230,7 +228,7 @@ function CameraPopup({ setIsOpened, chosenSquares, setHasAccessToLocation }) {
                         Price
                       </span>
                     </label>
-                  </div> */}
+                  </div>
                   <div className="flex py-2 px-2">
                     <h1 className="pl-2 pr-10 py-2">Photo:</h1>
                     {imageURL != null ? (

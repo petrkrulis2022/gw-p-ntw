@@ -1,0 +1,15 @@
+//-- NFT Land --//
+export const NFT_LAND_ADDRESS = "0x009f891e0a2f11dC9B2f95dcc86b983D173EA03d";
+
+//-- Earthverse Marketplace --//
+export const EARTHVERSE_MARKETPLACE_ADDRESS =
+  "0xc890Cba52Dd0BAEa79D2d1aEe47676F55Eb11fB4";
+
+//-- Earthverse Deposit --//
+export const EARTHVERSE_DEPOSIT_ADDRESS =
+  "0x8e89447dC261EAc5086750dbdD20462371861A46";
+
+//-- Stablecoin --//
+export const NFTD_ADDRESS = "0x0856021E4dFeb3F7d74B8311C6B1E9030cB4309d";
+export const DAI_ADDRESS = "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844";
+export const USDC_ADDRESS = "0x07865c6E87B9F70255377e024ace6630C1Eaa37F";

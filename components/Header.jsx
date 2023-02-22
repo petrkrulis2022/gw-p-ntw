@@ -2,6 +2,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
 
 import EarthIcon from "../svg/components/EarthIcon";
+import Link from "next/link";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import MetaMaskIcon from "../svg/components/MetaMaskIcon";
 import React from "react";
@@ -15,7 +16,7 @@ function Header({ words }) {
   const { disconnectAsync } = useDisconnect();
   const { isConnected } = useAccount();
   const { signMessageAsync } = useSignMessage();
-  const { push } = useRouter();
+  const { push, asPath } = useRouter();
 
   const handleAuth = async () => {
     if (isConnected) await disconnectAsync();
@@ -59,26 +60,36 @@ function Header({ words }) {
     <div className="absolute top-0 left-0 right-0 z-[401]">
       <nav className="bg-white border-gray-200 px-2 sm:px-4 py-2.5  dark:bg-gray-900">
         <div className="container flex justify-between items-center mx-auto">
-          <a href="#" className="flex items-center">
+          <Link href="/" className="flex items-center">
             <EarthIcon />
             <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
               Earthverse
             </span>
-          </a>
-          <div className="flex">
-            <div className="hidden relative md:block w-[40rem]">
-              <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
-                <SearchIcon />
-                <span className="sr-only">Search icon</span>
+          </Link>
+
+          {asPath === "/nftMarketplace" ? null : (
+            <Link href="/nftMarketplace" className="dark:text-white">
+              Marketplace
+            </Link>
+          )}
+
+          {words && (
+            <div className="flex">
+              <div className="hidden relative md:block w-[40rem]">
+                <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
+                  <SearchIcon />
+                  <span className="sr-only">Search icon</span>
+                </div>
+                <input
+                  type="text"
+                  id="search-navbar"
+                  defaultValue={words}
+                  className="block p-2 pl-10 w-full text-gray-900 bg-gray-50 rounded-lg border border-gray-300 sm:text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                />
               </div>
-              <input
-                type="text"
-                id="search-navbar"
-                defaultValue={words}
-                className="block p-2 pl-10 w-full text-gray-900 bg-gray-50 rounded-lg border border-gray-300 sm:text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              />
             </div>
-          </div>
+          )}
+
           <div className="justify-between items-center flex flex-row-reverse  md:order-1">
             {!session ? (
               <div>

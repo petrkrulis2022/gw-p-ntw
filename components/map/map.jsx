@@ -76,7 +76,6 @@ const Map = () => {
         ) {
           setInitialCoords([lat, lng]);
 
-          console.log("2");
           api
             .convertTo3wa({
               coordinates: { lat, lng },

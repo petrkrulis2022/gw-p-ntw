@@ -24,4 +24,54 @@
   height: 20px !important;
   width: 46.9px !important;
 }
+
+/* NFT Marketplace */
+.container-nft-land-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin: 90px;
+}
+
+.nft-land-box {
+  display: inline-block;
+  width: 400px;
+  height: 400px;
+  background-color: #ffffff;
+  border-radius: 30px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 8px 9px 22px 0 rgba(0, 0, 0, 0.3);
+}
+
+.nft-land-box-actions {
+  padding: 20px 10px 0px 10px;
+}
+
+.nft-land-box-actions-des {
+  padding: 0px 10px 0px 10px;
+  margin-top: 5px;
+  margin-bottom: 30px;
+  font-size: 10px;
+}
+
+.nft-land-box-actions-text {
+  display: flex;
+  gap: 25px;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
+.nft-land-box-actions-buttons {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.nft-land-box-actions-buttons h1 {
+  font-size: 25px;
+  font-weight: bold;
+}
+
 /* Custom Css */

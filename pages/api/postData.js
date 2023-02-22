@@ -8,7 +8,7 @@ export default async function handler(req, res) {
       ipfsCameraLink,
       imageAvatarURL,
       ipfsAvatarLink,
-      // price,
+      price,
     } = req.body;
 
     saveDatabase(
@@ -18,8 +18,8 @@ export default async function handler(req, res) {
       imageURL,
       ipfsCameraLink,
       imageAvatarURL,
-      ipfsAvatarLink
-      // price
+      ipfsAvatarLink,
+      price
     );
     res.status(200).send({ message: "Your Data has been saved successfully" });
   } else {
@@ -34,8 +34,8 @@ async function saveDatabase(
   imageURL,
   ipfsCameraLink,
   imageAvatarURL,
-  ipfsAvatarLink
-  // price
+  ipfsAvatarLink,
+  price
 ) {
   let res = await fetch(`${process.env.NEXTAUTH_URL}/api/connectDB`, {
     method: "POST",
@@ -47,7 +47,7 @@ async function saveDatabase(
       ipfsCameraLink: ipfsCameraLink,
       imageAvatarURL: imageAvatarURL,
       ipfsAvatarLink: ipfsAvatarLink,
-      // price: price,
+      price: price,
     }),
   });
 

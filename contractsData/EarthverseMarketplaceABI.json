@@ -1,0 +1,153 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "tokenId", "type": "uint256" }
+      ],
+      "name": "AlreadyListed",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "itemId", "type": "uint256" }
+      ],
+      "name": "ItemDoesntExit",
+      "type": "error"
+    },
+    { "inputs": [], "name": "NotOwner", "type": "error" },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "itemId", "type": "uint256" },
+        { "internalType": "uint256", "name": "price", "type": "uint256" }
+      ],
+      "name": "PriceDoNotMet",
+      "type": "error"
+    },
+    { "inputs": [], "name": "PriceMustBeAboveZero", "type": "error" },
+    { "inputs": [], "name": "SellerCannotBeBuyer", "type": "error" },
+    { "inputs": [], "name": "ZeroAddress", "type": "error" },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "itemId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "price",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "seller",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "buyer",
+          "type": "address"
+        }
+      ],
+      "name": "NFTLandBought",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "itemId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "price",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "seller",
+          "type": "address"
+        }
+      ],
+      "name": "NFTLandListed",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "buyer", "type": "address" },
+        { "internalType": "uint256", "name": "itemId", "type": "uint256" },
+        { "internalType": "uint256", "name": "price", "type": "uint256" },
+        {
+          "internalType": "uint256",
+          "name": "decimalsOfInput",
+          "type": "uint256"
+        }
+      ],
+      "name": "buyNFTLand",
+      "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "itemCount",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC721",
+          "name": "nftLand",
+          "type": "address"
+        },
+        { "internalType": "uint256", "name": "tokenId", "type": "uint256" },
+        { "internalType": "uint256", "name": "price", "type": "uint256" }
+      ],
+      "name": "listNFTLand",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "name": "listing",
+      "outputs": [
+        { "internalType": "uint256", "name": "id", "type": "uint256" },
+        {
+          "internalType": "contract IERC721",
+          "name": "nftLand",
+          "type": "address"
+        },
+        { "internalType": "uint256", "name": "tokenId", "type": "uint256" },
+        { "internalType": "uint256", "name": "price", "type": "uint256" },
+        { "internalType": "address", "name": "seller", "type": "address" }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+}
