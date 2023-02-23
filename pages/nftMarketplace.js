@@ -69,8 +69,8 @@ export default function NFTMarketplace() {
       });
     }
 
-    setNftLandItems(nftLandItemsClone);
     setIsLoading(false);
+    setNftLandItems(nftLandItemsClone);
   }, [signer]);
 
   const handleBuyNftLandClick = async (nftLandItem) => {
@@ -107,7 +107,7 @@ export default function NFTMarketplace() {
   };
 
   useEffect(() => {
-    if (signer === undefined) return;
+    if (!signer) return;
 
     loadMarketplaceItems();
   }, [loadMarketplaceItems, signer]);
@@ -126,7 +126,12 @@ export default function NFTMarketplace() {
               <div className="nft-land-box-actions">
                 <div className="nft-land-box-actions-text">
                   <p>{item.name}</p>
-                  <p>{ethers.utils.formatEther(item.price) * 10 ** 18} NFTD</p>
+                  <p>
+                    {(ethers.utils.formatEther(item.price) * 10 ** 18).toFixed(
+                      0
+                    )}{" "}
+                    NFTD
+                  </p>
                 </div>
                 <p className="nft-land-box-actions-des">{item.description}</p>
                 {address === item.seller ? (
@@ -169,9 +174,9 @@ export default function NFTMarketplace() {
           ))}
         </div>
       ) : (
-        <main style={{ padding: "1rem 0" }}>
+        <div>
           <h2>No listed assets</h2>
-        </main>
+        </div>
       )}
     </>
   );

@@ -8,6 +8,9 @@
     },
     {
       "path": "../NFTD-EARTHVERSE/NFTD-stablecoin-app/hashing"
+    },
+    {
+      "path": "../nft_marketplace-main"
     }
   ],
   "settings": {
